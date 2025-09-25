@@ -1,0 +1,290 @@
+ codex/implement-3-column-pdp-layout
+<section class="buyBox" data-sticky-buy-box>
+    <div class="buyBox-card">
+        <div class="buyBox-pricing">
+            {{#if product.call_for_price}}
+                <p class="buyBox-priceText">{{product.call_for_price}}</p>
+            {{else}}
+                <div class="buyBox-price">
+                    {{#or customer (unless settings.hide_price_from_guests)}}
+                        {{> components/products/price price=product.price schema_org=schema}}
+                    {{else}}
+                        {{> components/common/login-for-pricing}}
+                    {{/or}}
+                </div>
+            {{/if}}
+            <div class="buyBox-unitPrice">
+                <span class="buyBox-unitPriceLabel">Unit price</span>
+                <span class="buyBox-unitPriceValue" data-unit-price></span>
+            </div>
+        </div>
+
+        {{{region name="product_below_price"}}}
+
+        {{#if theme_settings.product-countDown}}
+            {{#if theme_settings.product-countDown-type '==' 'all'}}
+                {{#or theme_settings.countDownText theme_settings.product-countDown}}
+                    <div class="productCountDown buyBox-countDown">
+                        {{#if theme_settings.product-countDown-time}}
+                            <div class="countDowntimer product-count-down" data-count-down="{{theme_settings.product-countDown-time}}"></div>
+                        {{/if}}
+                    </div>
+                {{/or}}
+            {{else}}
+                {{#each product.custom_fields}}
+                    {{#if name '===' '__countDown'}}
+                        <div class="productCountDown buyBox-countDown">
+                            <div class="countDowntimer product-count-down" data-count-down="{{{value}}}"></div>
+                        </div>
+                    {{/if}}
+                {{/each}}
+            {{/if}}
+        {{/if}}
+
+        <div class="buyBox-availability" data-product-availability>
+            {{#if product.availability}}
+                <span class="buyBox-availabilityLabel">Availability:</span>
+                <span class="buyBox-availabilityValue">{{product.availability}}</span>
+            {{/if}}
+        </div>
+
+        <div class="buyBox-fulfillment">
+            <div class="buyBox-zip" data-buy-box-zip>
+                <span class="buyBox-zipLabel">Deliver to</span>
+                <span class="buyBox-zipValue" data-zip></span>
+                <button class="buyBox-zipAction" type="button" data-change-zip>Change</button>
+            </div>
+            <div class="buyBox-eta" data-delivery-eta></div>
+        </div>
+
+        {{#if product.release_date }}
+            <p class="buyBox-releaseDate">{{product.release_date}}</p>
+        {{/if}}
+
+        <form class="buyBox-form form" method="post" action="{{product.cart_url}}" enctype="multipart/form-data" data-cart-item-add>
+            <input type="hidden" name="action" value="add">
+            <input type="hidden" name="product_id" value="{{product.id}}"/>
+            <div class="buyBox-options" data-buy-box-options data-product-option-change style="display:none;">
+
+ codex/implement-unit-price-calculation-feature
+<div class="buyBox"
+    data-buy-box
+    {{#each product.custom_fields}}
+        {{#if name '==' 'net_volume_ml'}}
+            data-net-volume-ml="{{value}}"
+        {{/if}}
+        {{#if name '==' 'unit_of_measure'}}
+            data-unit-of-measure="{{value}}"
+        {{/if}}
+    {{/each}}
+>
+    <div class="buyBox-price">
+        {{#if product.call_for_price}}
+            <p class="productView-price">
+                <span>{{product.call_for_price}}</span>
+            </p>
+        {{else}}
+            {{#or customer (unless settings.hide_price_from_guests)}}
+                {{> components/products/price price=product.price schema_org=schema}}
+                <span class="unitPrice" data-unit-price aria-live="polite" aria-hidden="true" hidden></span>
+            {{else}}
+                {{> components/common/login-for-pricing}}
+            {{/or}}
+        {{/if}}
+    </div>
+</div>
+
+ codex/implement-sticky-buy-box-and-buy-now
+<div class="buyBox" data-buy-box>
+    <div class="buyBox__inner">
+        <div class="buyBox__status" aria-live="polite">
+            <p class="buyBox__availability" data-product-availability>
+                {{#if product.availability}}
+                    {{product.availability}}
+                {{else if product.can_purchase}}
+                    In stock
+                {{else}}
+                    Out of stock
+                {{/if}}
+            </p>
+            <p class="buyBox__eta" data-zip-eta>
+                Deliver to <span data-zip-placeholder>Enter ZIP</span> &bull; ETA coming soon
+            </p>
+        </div>
+
+        <div class="buyBox__pricing" aria-live="polite">
+            {{> components/products/price price=product.price schema_org=schema}}
+            <span class="unitPrice" data-unit-price></span>
+        </div>
+
+        <form class="buyBox__form form" method="post" action="{{product.cart_url}}" enctype="multipart/form-data" data-cart-item-add>
+            <input type="hidden" name="action" value="add">
+            <input type="hidden" name="product_id" value="{{product.id}}">
+
+            <div class="buyBox__options" data-product-option-change style="display:none;">
+ main
+                {{inject 'showSwatchNames' theme_settings.show_product_swatch_names}}
+                {{#each product.options}}
+                    {{{dynamicComponent 'components/products/options'}}}
+                {{/each}}
+            </div>
+
+ codex/implement-3-column-pdp-layout
+            <div class="form-field form-field--stock buyBox-stock{{#unless product.stock_level}} u-hiddenVisually{{/unless}}">
+                <label class="form-label form-label--alternate">
+                    {{lang 'products.current_stock'}}
+                    <span data-product-stock>{{product.stock_level}}</span>
+                </label>
+            </div>
+
+            {{#if product.out_of_stock}}
+                {{#if product.out_of_stock_message}}
+                    {{> components/common/alert/alert-error product.out_of_stock_message}}
+                {{else}}
+                    {{> components/common/alert/alert-error (lang 'products.sold_out')}}
+                {{/if}}
+            {{/if}}
+
+            <div class="buyBox-quantityCtas" data-buy-box-ctas>
+                {{> components/products/add-to-cart}}
+            </div>
+        </form>
+
+        <div class="buyBox-subscribe" data-subscribe-toggle>
+            <button type="button" class="button button--ghost">Subscribe &amp; Save</button>
+        </div>
+
+        {{#if settings.show_wishlist}}
+            <div class="buyBox-wishlist" data-wishlist-action>
+
+            <div class="buyBox__inventory">
+                <div class="form-field form-field--stock{{#unless product.stock_level}} u-hiddenVisually{{/unless}}">
+                    <span class="form-label form-label--alternate">
+                        {{lang 'products.current_stock'}}
+                        <span data-product-stock>{{product.stock_level}}</span>
+                    </span>
+                </div>
+
+                {{#if product.out_of_stock}}
+                    {{#if product.out_of_stock_message}}
+                        {{> components/common/alert/alert-error product.out_of_stock_message}}
+                    {{else}}
+                        {{> components/common/alert/alert-error (lang 'products.sold_out')}}
+                    {{/if}}
+                {{/if}}
+            </div>
+
+            <div class="buyBox__quantity">
+                {{> components/products/add-to-cart}}
+            </div>
+
+            <div class="buyBox__actions">
+                <button type="button" class="button button--primary buyBox__buyNow" data-buy-now>Buy Now</button>
+            </div>
+        </form>
+
+        {{#if settings.show_wishlist}}
+            <div class="buyBox__wishlist">
+ main
+                {{> components/common/wishlist-dropdown}}
+            </div>
+        {{/if}}
+
+ codex/implement-3-column-pdp-layout
+        {{#unless is_ajax}}
+            <div class="buyBox-share">
+                {{> components/common/share url=product.url}}
+            </div>
+        {{/unless}}
+
+        {{#if product_layout '!=' 'quickview'}}
+            {{#if theme_settings.halo_sticky_add_to_cart}}
+                {{> components/halothemes/product/halo-sticky-add-to-cart}}
+            {{/if}}
+        {{/if}}
+
+        <div class="buyBox-socialProof" data-social-proof>
+            <p class="buyBox-socialProofText">Over <span data-social-proof-count>{{#each product.custom_fields}}{{#if name '==' 'sold_past_30d'}}{{value}}{{/if}}{{/each}}</span> customers purchased in the last 30 days.</p>
+        </div>
+    </div>
+</section>
+
+{{#if product_layout '!=' 'quickview'}}
+<div class="buyBox-mobileBar" data-buy-box-mobile-bar>
+    <div class="buyBox-mobileBar-inner">
+        <div class="buyBox-mobileBar-price">
+            {{#if product.call_for_price}}
+                <span class="buyBox-mobileBar-priceText">{{product.call_for_price}}</span>
+            {{else}}
+                {{#or customer (unless settings.hide_price_from_guests)}}
+                    {{> components/products/price price=product.price schema_org=false}}
+                {{else}}
+                    {{> components/common/login-for-pricing}}
+                {{/or}}
+            {{/if}}
+        </div>
+        <button class="button button--primary buyBox-mobileBar-button" type="button" data-mobile-add-to-cart>
+            {{lang 'products.add_to_cart'}}
+        </button>
+    </div>
+</div>
+{{/if}}
+
+        <div class="buyBox__subscribe" aria-live="polite">
+            <button type="button" class="buyBox__subscribeToggle" aria-pressed="false" disabled aria-disabled="true">
+                <span class="buyBox__subscribeLabel">Subscribe &amp; Save</span>
+                <span class="buyBox__subscribeStatus">Coming soon</span>
+            </button>
+        </div>
+
+        {{#each product.custom_fields}}
+            {{#if name '==' 'sold_past_30d'}}
+                <p class="buyBox__socialProof">{{value}}</p>
+            {{/if}}
+        {{/each}}
+    </div>
+
+    <form action="/checkout.php" method="post" data-buy-now-form hidden>
+        <input type="hidden" name="action" value="add">
+        <input type="hidden" name="product_id" value="{{product.id}}">
+    </form>
+</div>
+
+ codex/implement-zip-code-input-and-eta-widget
+<input type="text" class="zipChecker" data-zip-checker maxlength="5" placeholder="Enter ZIP">
+<div class="deliveryEta" data-eta aria-live="polite"></div>
+
+<div class="buyBox" data-buy-box>
+    {{#if product.price}}
+    <div class="buyBox-pricing" data-subscribe-price-region aria-live="polite">
+        <div data-subscribe-price-base>
+            {{> components/products/price price=product.price schema_org=schema}}
+        </div>
+        <div class="subscribeSave-pricing" data-subscribe-price-subscribed hidden>
+            <span class="subscribeSave-priceOriginal" data-subscribe-original-price></span>
+            <span class="subscribeSave-priceDiscounted" data-subscribe-discounted-price></span>
+        </div>
+    </div>
+    {{/if}}
+
+    <div class="subscribeSave">
+        <label class="subscribeSave-toggle">
+            <input type="checkbox" data-subscribe-toggle>
+            <span>Subscribe &amp; Save</span>
+        </label>
+        <div class="subscribeSave-plan" data-subscribe-plan-wrapper hidden>
+            <label class="subscribeSave-planLabel" for="subscribe-plan">Delivery frequency</label>
+            <select id="subscribe-plan" data-subscribe-plan>
+                <option value="30">Every 30 days</option>
+                <option value="60">Every 60 days</option>
+                <option value="90">Every 90 days</option>
+            </select>
+        </div>
+    </div>
+
+    {{> components/products/add-to-cart}}
+</div>
+ main
+ main
+ main
+ main

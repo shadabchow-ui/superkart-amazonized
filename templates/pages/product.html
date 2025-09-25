@@ -22,22 +22,90 @@ product:
 {{inject "productSize" theme_settings.product_size}}
 
 {{#partial "page"}}
-    <div class="container"> 
+ codex/implement-schema.org-structured-data
+    {{#if product}}
+        <script type="application/ld+json">
+        {
+          "@context": "https://schema.org/",
+          "@type": "Product"{{#if product.title}},
+          "name": "{{product.title}}"{{/if}}{{#if product.images.length}},
+          "image": [
+            {{#each product.images}}
+            "{{getImage this 'zoom'}}"{{#unless @last}},{{/unless}}
+            {{/each}}
+          ]{{/if}}{{#if product.sku}},
+          "sku": "{{product.sku}}"{{/if}}{{#if product.brand.name}},
+          "brand": {
+            "@type": "Brand",
+            "name": "{{product.brand.name}}"
+          }{{/if}}{{#if custom_fields.gtin}},
+          "gtin": "{{custom_fields.gtin}}"{{/if}}{{#if custom_fields.upc}},
+          "gtin12": "{{custom_fields.upc}}"{{/if}}{{#or custom_fields.unit_of_measure custom_fields.net_volume_ml}},
+          "additionalProperty": [
+            {{#if custom_fields.unit_of_measure}}
+            {
+              "@type": "PropertyValue",
+              "name": "Unit of Measure",
+              "value": "{{custom_fields.unit_of_measure}}"
+            }{{#if custom_fields.net_volume_ml}},{{/if}}
+            {{/if}}
+            {{#if custom_fields.net_volume_ml}}
+            {
+              "@type": "PropertyValue",
+              "name": "Net Volume (ml)",
+              "value": "{{custom_fields.net_volume_ml}}"
+            }
+            {{/if}}
+          ]{{/or}}{{#if product.price.without_tax.value}},
+          "offers": {
+            "@type": "Offer",
+            "price": {{product.price.without_tax.value}}{{#if currency_selector.active_currency_code}},
+            "priceCurrency": "{{currency_selector.active_currency_code}}"{{/if}},
+            "availability": "https://schema.org/InStock"{{#if product.url}},
+            "url": "{{product.url}}"{{/if}}
+          }{{/if}}{{#if product.num_reviews '>' 0}},
+          "aggregateRating": {
+            "@type": "AggregateRating"{{#if product.rating}},
+            "ratingValue": {{product.rating}}{{/if}},
+            "reviewCount": {{product.num_reviews}}
+          }{{/if}}
+        }
+        </script>
+    {{/if}}
+    <div class="container">
         {{> components/common/breadcrumbs breadcrumbs=breadcrumbs}}
 
-        {{#each product.shipping_messages}}
-            {{> components/common/alert/alert-info message}}
-        {{/each}}
-    </div>
+    <div class="productPage productPage--amazonized">
+        <div class="container productPage-header">
+            {{> components/common/breadcrumbs breadcrumbs=breadcrumbs}}
+ main
 
-    <div itemscope itemtype="http://schema.org/Product">
-        {{> components/products/product-view schema=true  }}
+            {{#each product.shipping_messages}}
+                {{> components/common/alert/alert-info message}}
+            {{/each}}
+        </div>
+
+        <div class="productPage-body" itemscope itemtype="http://schema.org/Product">
+            {{> components/products/product-view schema=true  }}
+
+ codex/implement-3-column-pdp-layout
+            {{{region name="product_below_content"}}}
+
+        {{> components/products/fbt product=product}}
 
         {{{region name="product_below_content"}}}
+ main
 
-        {{#if product.videos.list.length}}
-            {{> components/products/videos product.videos}}
-        {{/if}}
+            {{#if product.videos.list.length}}
+                {{> components/products/videos product.videos}}
+            {{/if}}
+
+ codex/implement-3-column-pdp-layout
+            {{#all settings.show_product_reviews theme_settings.show_product_reviews (if theme_settings.show_product_reviews_tabs '!==' true)}}
+                <div class="detailReviews-block">
+                    <div class="container">
+                        {{> components/products/reviews reviews=product.reviews product=product urls=urls}}
+                    </div>
 
         {{> components/products/tabs}}
 
@@ -47,13 +115,22 @@ product:
             <div class="detailReviews-block">
                 <div class="container">
                     {{> components/products/reviews reviews=product.reviews product=product urls=urls}}
+ main
                 </div>
-            </div>
-        {{/all}}
+            {{/all}}
+
+ codex/implement-3-column-pdp-layout
+            {{> components/products/tabs}}
+
+            <div id="detailProduct-banner" class="detailProduct-banner">
+                <div class="container">
+                    <img class="lazyload" src="{{cdn 'img/loading.svg'}}" data-src="https://cdn11.bigcommerce.com/s-{{settings.store_hash}}/product_images/uploaded_images/{{theme_settings.detailProduct_banner}}" alt="Bottom Banner">
+                </div>
 
         <div id="detailProduct-banner" class="detailProduct-banner">
             <div class="container">
                 <img class="lazyload" src="{{cdn 'img/loading.svg'}}" data-src="https://cdn11.bigcommerce.com/s-{{settings.store_hash}}/product_images/uploaded_images/{{theme_settings.detailProduct_banner}}" alt="Bottom Banner">
+ main
             </div>
         </div>
     </div>

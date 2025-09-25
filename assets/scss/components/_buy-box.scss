@@ -1,0 +1,322 @@
+ codex/implement-3-column-pdp-layout
+.productView-layout {
+    margin-top: spacing("double");
+}
+
+.productView-grid {
+    display: grid;
+    gap: spacing("double");
+}
+
+.productView-column {
+    min-width: 0;
+}
+
+.productView-column--buyBox {
+    position: relative;
+}
+
+@media (max-width: 1023px) {
+    .productView-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .productView-column--gallery {
+        order: 1;
+    }
+
+    .productView-column--content {
+        order: 2;
+    }
+
+    .productView-column--buyBox {
+        order: 3;
+    }
+
+    .productView-layout {
+        padding-bottom: 96px;
+    }
+}
+
+@media (min-width: 1024px) {
+    .productView-grid {
+        grid-template-columns: minmax(0, 1.5fr) minmax(0, 1.6fr) minmax(320px, 1fr);
+        align-items: start;
+    }
+
+    .productView-column--buyBox {
+        align-self: stretch;
+    }
+
+    .buyBox {
+        position: sticky;
+        top: spacing("double");
+    }
+
+    .buyBox-mobileBar {
+        display: none;
+    }
+}
+
+.buyBox-card {
+    background: #fff;
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    border-radius: 16px;
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.08);
+    padding: spacing("double");
+    display: flex;
+    flex-direction: column;
+    gap: spacing("double");
+}
+
+.buyBox-pricing {
+    display: flex;
+    flex-direction: column;
+    gap: spacing("half");
+}
+
+.buyBox-price :is(.price--main, .price--non-sale) {
+    font-size: $h3-font-size;
+    line-height: $h3-line-height;
+}
+
+.buyBox-unitPrice {
+    font-size: $fontSize-root - 1;
+    color: stencilColor('color-textSecondary');
+    display: flex;
+    gap: spacing("quarter");
+    align-items: baseline;
+}
+
+.buyBox-availability,
+.buyBox-fulfillment,
+.buyBox-releaseDate {
+    font-size: $fontSize-root - 1;
+    color: stencilColor('color-textSecondary');
+}
+
+.buyBox-fulfillment {
+    display: flex;
+    flex-wrap: wrap;
+    gap: spacing("half");
+    align-items: center;
+}
+
+.buyBox-zip {
+    display: inline-flex;
+    align-items: center;
+    gap: spacing("quarter");
+}
+
+.buyBox-zipAction {
+    background: none;
+    border: 0;
+    color: stencilColor('color-textLink');
+    cursor: pointer;
+    font-size: inherit;
+    padding: 0;
+    text-decoration: underline;
+}
+
+.buyBox-form {
+    display: flex;
+    flex-direction: column;
+    gap: spacing("single");
+}
+
+.buyBox-quantityCtas {
+    display: flex;
+    flex-direction: column;
+    gap: spacing("single");
+}
+
+.buyBox-subscribe,
+.buyBox-wishlist,
+.buyBox-share {
+    display: flex;
+    justify-content: center;
+}
+
+.buyBox-subscribe .button,
+.buyBox-mobileBar-button {
+    text-transform: uppercase;
+}
+
+.buyBox-socialProof {
+    background: stencilColor('color-bgLight');
+    border-radius: 12px;
+    padding: spacing("single");
+    text-align: center;
+    font-size: $fontSize-root - 1;
+    color: stencilColor('color-textSecondary');
+}
+
+.buyBox-mobileBar {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: #fff;
+    box-shadow: 0 -6px 24px rgba(0, 0, 0, 0.1);
+    padding: spacing("single");
+    z-index: 10;
+}
+
+.buyBox-mobileBar-inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: spacing("single");
+}
+
+.buyBox-mobileBar-price {
+    font-weight: $body-bold-font-weight;
+}
+
+.buyBox-mobileBar-button {
+    flex: 0 0 auto;
+    min-width: 160px;
+=======
+.buyBox {
+    position: sticky;
+    top: 2rem;
+    align-self: flex-start;
+    z-index: 1;
+
+    &__inner {
+        background: #ffffff;
+        border: 1px solid rgba(17, 24, 39, 0.08);
+        border-radius: 0.75rem;
+        padding: 1.5rem;
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+        transition: box-shadow 0.3s ease, border-color 0.3s ease;
+    }
+
+    &__status {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    &__availability {
+        font-weight: 600;
+        color: #14532d;
+    }
+
+    &__eta {
+        font-size: 0.875rem;
+        color: #4b5563;
+        margin: 0;
+    }
+
+    &__pricing {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .unitPrice {
+        font-size: 0.875rem;
+        color: #1f2937;
+    }
+
+    &__form {
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+    }
+
+    #add-to-cart-wrapper {
+        display: grid;
+        gap: 1rem;
+    }
+
+    .form-increment {
+        width: 100%;
+    }
+
+    #form-action-addToCart {
+        width: 100%;
+    }
+
+    &__actions {
+        display: grid;
+        gap: 0.75rem;
+    }
+
+    &__buyNow {
+        width: 100%;
+    }
+
+    &__wishlist {
+        display: flex;
+        justify-content: center;
+        width: 100%;
+    }
+
+    &__wishlist form {
+        width: 100%;
+        max-width: 20rem;
+    }
+
+    &__wishlist .button {
+        width: 100%;
+    }
+
+    &__subscribe {
+        display: flex;
+        justify-content: center;
+        text-align: center;
+    }
+
+    &__subscribeToggle {
+        width: 100%;
+        max-width: 20rem;
+        border: 1px dashed rgba(17, 24, 39, 0.2);
+        border-radius: 999px;
+        padding: 0.75rem 1.5rem;
+        background: transparent;
+        color: #1f2937;
+        font-weight: 600;
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+        align-items: center;
+        cursor: not-allowed;
+    }
+
+    &__socialProof {
+        font-size: 0.875rem;
+        color: #b91c1c;
+        font-weight: 600;
+        margin: 0;
+        text-align: center;
+    }
+
+    &--stuck &__inner {
+        box-shadow: 0 1.5rem 2.5rem -1.5rem rgba(17, 24, 39, 0.45);
+        border-color: rgba(17, 24, 39, 0.1);
+    }
+
+    &__actions .button:focus,
+    &__actions .button:focus-visible,
+    #form-action-addToCart:focus,
+    #form-action-addToCart:focus-visible {
+        outline: 2px solid currentColor;
+        outline-offset: 3px;
+    }
+}
+
+@media (max-width: 767px) {
+    .buyBox {
+        position: static;
+        top: auto;
+    }
+
+    .buyBox__inner {
+        border-radius: 0.5rem;
+    }
+ main
+}

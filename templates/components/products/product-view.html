@@ -1,5 +1,5 @@
 <div class="productView" data-event-type="product" data-entity-id="{{product.id}}" data-name="{{product.title}}" data-product-category="{{#each product.category}}{{#if @last}}{{this}}{{else}}{{this}}, {{/if}}{{/each}}" data-product-brand="{{product.brand.name}}" data-product-price="{{#if product.price.with_tax}}{{product.price.with_tax.value}}{{else}}{{product.price.without_tax.value}}{{/if}}" data-product-variant="single-product-option">
-    <div class="container"> 
+    <div class="productView-alerts container">
         {{#each product.reviews.messages}}
             {{#if error}}
                 {{> components/common/alert/alert-error error}}
@@ -8,8 +8,12 @@
                 {{> components/common/alert/alert-success success}}
             {{/if}}
         {{/each}}
+    </div>
 
-        <section class="productView-images" data-image-gallery>
+    <div class="productView-layout container">
+        <div class="productView-grid" data-product-layout>
+            <div class="productView-column productView-column--gallery">
+                <section class="productView-images" data-image-gallery>
             {{!--
                 Note that these image sizes are coupled to image sizes used in /assets/js/theme/common/product-details.js
                 for variant/rule image replacement
@@ -234,7 +238,9 @@
                 </div>
             </div>
         </section>
+            </div>
 
+            <div class="productView-column productView-column--content">
         <section class="productView-details product-data">
             <div class="productView-product">
                 {{#if product_layout '!=' 'quickview'}}
@@ -251,6 +257,82 @@
                     </h2>
                 {{/if}}
                 <h1 class="productView-title" {{#if schema}}itemprop="name"{{/if}}>{{product.title}}</h1>
+                {{#or product.brand product.custom_fields product.description}}
+                    <div class="productSummaryMeta">
+                        {{#or product.brand product.custom_fields}}
+                            <dl class="productSpecs">
+                                {{#inArray (pluck product.custom_fields 'name') 'brand'}}
+                                    {{#each product.custom_fields}}
+                                        {{#if name '==' 'brand'}}
+                                            {{#if value}}
+                                                <dt class="productSpecs-term">Brand</dt>
+                                                <dd class="productSpecs-definition">{{{sanitize value}}}</dd>
+                                            {{/if}}
+                                        {{/if}}
+                                    {{/each}}
+                                {{else}}
+                                    {{#if product.brand.name}}
+                                        <dt class="productSpecs-term">Brand</dt>
+                                        <dd class="productSpecs-definition">{{product.brand.name}}</dd>
+                                    {{/if}}
+                                {{/inArray}}
+                                {{#each product.custom_fields}}
+                                    {{#if name '==' 'net_volume_ml'}}
+                                        {{#if value}}
+                                            <dt class="productSpecs-term">Volume</dt>
+                                            <dd class="productSpecs-definition">{{round (divide value 29.5735) 1}} fl oz</dd>
+                                        {{/if}}
+                                    {{/if}}
+                                {{/each}}
+                                {{#each product.custom_fields}}
+                                    {{#if name '==' 'manufacturer'}}
+                                        {{#if value}}
+                                            <dt class="productSpecs-term">Manufacturer</dt>
+                                            <dd class="productSpecs-definition">{{{sanitize value}}}</dd>
+                                        {{/if}}
+                                    {{/if}}
+                                {{/each}}
+                                {{#each product.custom_fields}}
+                                    {{#if name '==' 'gtin'}}
+                                        {{#if value}}
+                                            <dt class="productSpecs-term">GTIN</dt>
+                                            <dd class="productSpecs-definition">{{{sanitize value}}}</dd>
+                                        {{/if}}
+                                    {{/if}}
+                                {{/each}}
+                                {{#each product.custom_fields}}
+                                    {{#if name '==' 'upc'}}
+                                        {{#if value}}
+                                            <dt class="productSpecs-term">UPC</dt>
+                                            <dd class="productSpecs-definition">{{{sanitize value}}}</dd>
+                                        {{/if}}
+                                    {{/if}}
+                                {{/each}}
+                            </dl>
+                        {{/or}}
+                        {{#if product.description}}
+                            {{#with (first (split product.description '<hr')) as |aboutSource|}}
+                                {{#with (split aboutSource '<li>') as |rawItems|}}
+                                    {{#if rawItems.length '>' 1}}
+                                        <ul class="aboutItem">
+                                            {{#each rawItems}}
+                                                {{#if @index '>' 0}}
+                                                    {{#if @index '<=' 4}}
+                                                        {{#with (first (split this '</li>')) as |bulletHtml|}}
+                                                            {{#if bulletHtml}}
+                                                                <li>{{{bulletHtml}}}</li>
+                                                            {{/if}}
+                                                        {{/with}}
+                                                    {{/if}}
+                                                {{/if}}
+                                            {{/each}}
+                                        </ul>
+                                    {{/if}}
+                                {{/with}}
+                            {{/with}}
+                        {{/if}}
+                    </div>
+                {{/or}}
                 <div class="productView-rating-wrap">
                     <div class="productView-rating"{{#if product.num_reviews '>' 0}}{{#if schema}} itemprop="aggregateRating" itemscope itemtype="http://schema.org/AggregateRating"{{/if}}{{/if}}>
                         {{#if settings.show_product_rating}}
@@ -385,40 +467,6 @@
                 </div>
 
 
-                {{#if product.call_for_price}}
-                    <p class="productView-price">
-                        <span>{{product.call_for_price}}</span>
-                    </p>
-                {{/if}}
-                <div class="productView-price">
-                    {{#or customer (unless settings.hide_price_from_guests)}}
-                        {{> components/products/price price=product.price schema_org=schema}}
-                    {{else}}
-                        {{> components/common/login-for-pricing}}
-                    {{/or}}
-                </div>
-                {{{region name="product_below_price"}}}
-
-                {{#if theme_settings.product-countDown}}
-                    {{#if theme_settings.product-countDown-type '==' 'all'}}
-                        {{#or theme_settings.countDownText theme_settings.product-countDown}}
-                            <div class="productCountDown">
-                                {{#if theme_settings.product-countDown-time}}
-                                    <div class="countDowntimer product-count-down" data-count-down="{{theme_settings.product-countDown-time}}"></div>
-                                {{/if}}
-                            </div>
-                        {{/or}}
-                    {{else}}
-                        {{#each product.custom_fields}}
-                            {{#if name '===' '__countDown'}}
-                                <div class="productCountDown">
-                                    <div class="countDowntimer product-count-down" data-count-down="{{{value}}}"></div>
-                                </div>
-                            {{/if}}
-                        {{/each}}
-                    {{/if}}
-                {{/if}}
-
                 {{#if theme_settings.productView_desShort}}
                     <div class="productView-shortDesc">
                         <p style="-webkit-box-orient: vertical;">{{{ellipsis product.description 150}}}</p>
@@ -427,51 +475,20 @@
             </div>
         </section>
 
-        <section class="productView-details product-options">
-            <div class="productView-options">
-                {{#if product.release_date }}
-                    <p>{{product.release_date}}</p>
-                {{/if}}
-                <form class="form" method="post" action="{{product.cart_url}}" enctype="multipart/form-data"
-                      data-cart-item-add>
-                    <input type="hidden" name="action" value="add">
-                    <input type="hidden" name="product_id" value="{{product.id}}"/>
-                    <div data-product-option-change style="display:none;">
-                        {{inject 'showSwatchNames' theme_settings.show_product_swatch_names}}
-                        {{#each product.options}}
-                            {{{dynamicComponent 'components/products/options'}}}
-                        {{/each}}
-                    </div>
-                    <div class="form-field form-field--stock{{#unless product.stock_level}} u-hiddenVisually{{/unless}}">
-                        <label class="form-label form-label--alternate">
-                            {{lang 'products.current_stock'}}
-                            <span data-product-stock>{{product.stock_level}}</span>
-                        </label>
-                    </div>
-                    {{#if product.out_of_stock}}
-                        {{#if product.out_of_stock_message}}
-                            {{> components/common/alert/alert-error product.out_of_stock_message}}
-                        {{else}}
-                            {{> components/common/alert/alert-error (lang 'products.sold_out')}}
-                        {{/if}}
-                    {{/if}}
-                    
-                    {{> components/products/add-to-cart}}
-                </form>
-                {{#if settings.show_wishlist}}
-                    {{> components/common/wishlist-dropdown}}
-                {{/if}}
-                
-                {{#if product_layout '!=' 'quickview'}}
-                    {{#if theme_settings.halo_sticky_add_to_cart}}
-                        {{> components/halothemes/product/halo-sticky-add-to-cart}}
-                    {{/if}}
-                {{/if}}
             </div>
-            {{#unless is_ajax}}
-                {{> components/common/share url=product.url}}
-            {{/unless}}
-        </section>
+
+            <aside class="productView-column productView-column--buyBox" data-buy-box>
+                {{> components/products/buy-box
+                    product=product
+                    theme_settings=theme_settings
+                    settings=settings
+                    schema=schema
+                    products=products
+                    is_ajax=is_ajax
+                    urls=urls
+                }}
+            </aside>
+        </div>
 
         {{#if theme_settings.halo_viewing_product}}
             <div class="viewing-product">
