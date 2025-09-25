@@ -33,11 +33,17 @@ product:
     <div itemscope itemtype="http://schema.org/Product">
         {{> components/products/product-view schema=true  }}
 
+        {{> components/products/fbt product=product}}
+
         {{{region name="product_below_content"}}}
 
         {{#if product.videos.list.length}}
             {{> components/products/videos product.videos}}
         {{/if}}
+
+        {{> components/products/tabs}}
+
+        {{> components/products/a-plus product=product custom_fields=product.custom_fields}}
 
         {{#all settings.show_product_reviews theme_settings.show_product_reviews (if theme_settings.show_product_reviews_tabs '!==' true)}}
             <div class="detailReviews-block">
@@ -46,8 +52,6 @@ product:
                 </div>
             </div>
         {{/all}}
-
-        {{> components/products/tabs}}
 
         <div id="detailProduct-banner" class="detailProduct-banner">
             <div class="container">
