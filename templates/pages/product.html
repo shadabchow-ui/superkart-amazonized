@@ -22,9 +22,63 @@ product:
 {{inject "productSize" theme_settings.product_size}}
 
 {{#partial "page"}}
+ codex/implement-schema.org-structured-data
+    {{#if product}}
+        <script type="application/ld+json">
+        {
+          "@context": "https://schema.org/",
+          "@type": "Product"{{#if product.title}},
+          "name": "{{product.title}}"{{/if}}{{#if product.images.length}},
+          "image": [
+            {{#each product.images}}
+            "{{getImage this 'zoom'}}"{{#unless @last}},{{/unless}}
+            {{/each}}
+          ]{{/if}}{{#if product.sku}},
+          "sku": "{{product.sku}}"{{/if}}{{#if product.brand.name}},
+          "brand": {
+            "@type": "Brand",
+            "name": "{{product.brand.name}}"
+          }{{/if}}{{#if custom_fields.gtin}},
+          "gtin": "{{custom_fields.gtin}}"{{/if}}{{#if custom_fields.upc}},
+          "gtin12": "{{custom_fields.upc}}"{{/if}}{{#or custom_fields.unit_of_measure custom_fields.net_volume_ml}},
+          "additionalProperty": [
+            {{#if custom_fields.unit_of_measure}}
+            {
+              "@type": "PropertyValue",
+              "name": "Unit of Measure",
+              "value": "{{custom_fields.unit_of_measure}}"
+            }{{#if custom_fields.net_volume_ml}},{{/if}}
+            {{/if}}
+            {{#if custom_fields.net_volume_ml}}
+            {
+              "@type": "PropertyValue",
+              "name": "Net Volume (ml)",
+              "value": "{{custom_fields.net_volume_ml}}"
+            }
+            {{/if}}
+          ]{{/or}}{{#if product.price.without_tax.value}},
+          "offers": {
+            "@type": "Offer",
+            "price": {{product.price.without_tax.value}}{{#if currency_selector.active_currency_code}},
+            "priceCurrency": "{{currency_selector.active_currency_code}}"{{/if}},
+            "availability": "https://schema.org/InStock"{{#if product.url}},
+            "url": "{{product.url}}"{{/if}}
+          }{{/if}}{{#if product.num_reviews '>' 0}},
+          "aggregateRating": {
+            "@type": "AggregateRating"{{#if product.rating}},
+            "ratingValue": {{product.rating}}{{/if}},
+            "reviewCount": {{product.num_reviews}}
+          }{{/if}}
+        }
+        </script>
+    {{/if}}
+    <div class="container">
+        {{> components/common/breadcrumbs breadcrumbs=breadcrumbs}}
+
     <div class="productPage productPage--amazonized">
         <div class="container productPage-header">
             {{> components/common/breadcrumbs breadcrumbs=breadcrumbs}}
+ main
 
             {{#each product.shipping_messages}}
                 {{> components/common/alert/alert-info message}}
