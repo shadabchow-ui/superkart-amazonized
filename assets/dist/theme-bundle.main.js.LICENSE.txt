@@ -1,0 +1,39 @@
+/*!
+ * @name        easyzoom
+ * @author      Matt Hinchliffe
+ * @modified    Friday, December 30th, 2022
+ * @version     2.6.0
+ */
+
+/*!
+ * jQuery Cookie Plugin v1.4.1
+ * https://github.com/carhartl/jquery-cookie
+ *
+ * Copyright 2013 Klaus Hartl
+ * Released under the MIT license
+ */
+
+/*!
+ * jQuery.tabbable 1.0 - Simple utility for selecting the next / previous ':tabbable' element.
+ * https://github.com/marklagendijk/jQuery.tabbable
+ *
+ * Includes ':tabbable' and ':focusable' selectors from jQuery UI Core
+ *
+ * Copyright 2013, Mark Lagendijk
+ * Released under the MIT license
+ *
+ */
+
+/*! https://mths.be/punycode v1.4.1 by @mathias */
+
+/*! jQuery v3.7.1 | (c) OpenJS Foundation and other contributors | jquery.org/license */
+
+/*! matchMedia() polyfill - Test a CSS media type/query in JS. Authors & copyright (c) 2012: Scott Jehl, Paul Irish, Nicholas Zakas, David Knight. Dual MIT/BSD license */
+
+/**
+ * SVGInjector v1.1.3 - Fast, caching, dynamic inline SVG DOM injection library
+ * https://github.com/iconic/SVGInjector
+ *
+ * Copyright (c) 2014-2015 Waybury <hello@waybury.com>
+ * @license MIT
+ */
