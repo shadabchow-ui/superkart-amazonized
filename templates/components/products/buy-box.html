@@ -1,0 +1,84 @@
+<div class="buyBox" data-buy-box>
+    <div class="buyBox__inner">
+        <div class="buyBox__status" aria-live="polite">
+            <p class="buyBox__availability" data-product-availability>
+                {{#if product.availability}}
+                    {{product.availability}}
+                {{else if product.can_purchase}}
+                    In stock
+                {{else}}
+                    Out of stock
+                {{/if}}
+            </p>
+            <p class="buyBox__eta" data-zip-eta>
+                Deliver to <span data-zip-placeholder>Enter ZIP</span> &bull; ETA coming soon
+            </p>
+        </div>
+
+        <div class="buyBox__pricing" aria-live="polite">
+            {{> components/products/price price=product.price schema_org=schema}}
+            <span class="unitPrice" data-unit-price></span>
+        </div>
+
+        <form class="buyBox__form form" method="post" action="{{product.cart_url}}" enctype="multipart/form-data" data-cart-item-add>
+            <input type="hidden" name="action" value="add">
+            <input type="hidden" name="product_id" value="{{product.id}}">
+
+            <div class="buyBox__options" data-product-option-change style="display:none;">
+                {{inject 'showSwatchNames' theme_settings.show_product_swatch_names}}
+                {{#each product.options}}
+                    {{{dynamicComponent 'components/products/options'}}}
+                {{/each}}
+            </div>
+
+            <div class="buyBox__inventory">
+                <div class="form-field form-field--stock{{#unless product.stock_level}} u-hiddenVisually{{/unless}}">
+                    <span class="form-label form-label--alternate">
+                        {{lang 'products.current_stock'}}
+                        <span data-product-stock>{{product.stock_level}}</span>
+                    </span>
+                </div>
+
+                {{#if product.out_of_stock}}
+                    {{#if product.out_of_stock_message}}
+                        {{> components/common/alert/alert-error product.out_of_stock_message}}
+                    {{else}}
+                        {{> components/common/alert/alert-error (lang 'products.sold_out')}}
+                    {{/if}}
+                {{/if}}
+            </div>
+
+            <div class="buyBox__quantity">
+                {{> components/products/add-to-cart}}
+            </div>
+
+            <div class="buyBox__actions">
+                <button type="button" class="button button--primary buyBox__buyNow" data-buy-now>Buy Now</button>
+            </div>
+        </form>
+
+        {{#if settings.show_wishlist}}
+            <div class="buyBox__wishlist">
+                {{> components/common/wishlist-dropdown}}
+            </div>
+        {{/if}}
+
+        <div class="buyBox__subscribe" aria-live="polite">
+            <button type="button" class="buyBox__subscribeToggle" aria-pressed="false" disabled aria-disabled="true">
+                <span class="buyBox__subscribeLabel">Subscribe &amp; Save</span>
+                <span class="buyBox__subscribeStatus">Coming soon</span>
+            </button>
+        </div>
+
+        {{#each product.custom_fields}}
+            {{#if name '==' 'sold_past_30d'}}
+                <p class="buyBox__socialProof">{{value}}</p>
+            {{/if}}
+        {{/each}}
+    </div>
+
+    <form action="/checkout.php" method="post" data-buy-now-form hidden>
+        <input type="hidden" name="action" value="add">
+        <input type="hidden" name="product_id" value="{{product.id}}">
+    </form>
+</div>
