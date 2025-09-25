@@ -22,36 +22,38 @@ product:
 {{inject "productSize" theme_settings.product_size}}
 
 {{#partial "page"}}
-    <div class="container"> 
-        {{> components/common/breadcrumbs breadcrumbs=breadcrumbs}}
+    <div class="productPage productPage--amazonized">
+        <div class="container productPage-header">
+            {{> components/common/breadcrumbs breadcrumbs=breadcrumbs}}
 
-        {{#each product.shipping_messages}}
-            {{> components/common/alert/alert-info message}}
-        {{/each}}
-    </div>
+            {{#each product.shipping_messages}}
+                {{> components/common/alert/alert-info message}}
+            {{/each}}
+        </div>
 
-    <div itemscope itemtype="http://schema.org/Product">
-        {{> components/products/product-view schema=true  }}
+        <div class="productPage-body" itemscope itemtype="http://schema.org/Product">
+            {{> components/products/product-view schema=true  }}
 
-        {{{region name="product_below_content"}}}
+            {{{region name="product_below_content"}}}
 
-        {{#if product.videos.list.length}}
-            {{> components/products/videos product.videos}}
-        {{/if}}
+            {{#if product.videos.list.length}}
+                {{> components/products/videos product.videos}}
+            {{/if}}
 
-        {{#all settings.show_product_reviews theme_settings.show_product_reviews (if theme_settings.show_product_reviews_tabs '!==' true)}}
-            <div class="detailReviews-block">
-                <div class="container">
-                    {{> components/products/reviews reviews=product.reviews product=product urls=urls}}
+            {{#all settings.show_product_reviews theme_settings.show_product_reviews (if theme_settings.show_product_reviews_tabs '!==' true)}}
+                <div class="detailReviews-block">
+                    <div class="container">
+                        {{> components/products/reviews reviews=product.reviews product=product urls=urls}}
+                    </div>
                 </div>
-            </div>
-        {{/all}}
+            {{/all}}
 
-        {{> components/products/tabs}}
+            {{> components/products/tabs}}
 
-        <div id="detailProduct-banner" class="detailProduct-banner">
-            <div class="container">
-                <img class="lazyload" src="{{cdn 'img/loading.svg'}}" data-src="https://cdn11.bigcommerce.com/s-{{settings.store_hash}}/product_images/uploaded_images/{{theme_settings.detailProduct_banner}}" alt="Bottom Banner">
+            <div id="detailProduct-banner" class="detailProduct-banner">
+                <div class="container">
+                    <img class="lazyload" src="{{cdn 'img/loading.svg'}}" data-src="https://cdn11.bigcommerce.com/s-{{settings.store_hash}}/product_images/uploaded_images/{{theme_settings.detailProduct_banner}}" alt="Bottom Banner">
+                </div>
             </div>
         </div>
     </div>
