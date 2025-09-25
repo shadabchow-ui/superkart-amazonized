@@ -92,6 +92,14 @@ export default class ProductDetails extends ProductDetailsBase {
         if (this.context.themeSettings.halo_viewing_product) {
             this.viewingProduct(this.context);
         }
+
+        this.zipStorageKey = 'pdpZipCode';
+        this.$zipInput = $('[data-zip-checker]', this.$scope);
+        this.$etaDisplay = $('[data-eta]', this.$scope);
+
+        if (this.$zipInput.length && this.$etaDisplay.length) {
+            this.initializeEtaEstimator();
+        }
     }
 
     setProductVariant() {
@@ -692,11 +700,129 @@ export default class ProductDetails extends ProductDetailsBase {
         super.updateProductAttributes(data);
         this.showProductImage(data.image);
     }
+    initializeEtaEstimator() {
+        const savedZip = this.getStoredZip();
+
+        if (savedZip) {
+            this.$zipInput.val(savedZip);
+            this.updateEtaDisplay(savedZip);
+        } else {
+            this.updateEtaDisplay('');
+        }
+
+        this.$zipInput.on('change', event => {
+            const zip = event.target.value.trim();
+
+            this.persistZip(zip);
+            this.updateEtaDisplay(zip);
+        });
+    }
+
+    updateEtaDisplay(zip) {
+        const etaMessage = this.estimateEta(zip);
+
+        if (!zip) {
+            this.$etaDisplay.text('Enter a ZIP code to see delivery estimate.');
+
+            return;
+        }
+
+        if (etaMessage) {
+            this.$etaDisplay.text(etaMessage);
+        } else {
+            this.$etaDisplay.text('Enter a valid 5-digit ZIP to estimate delivery.');
+        }
+    }
+
+    persistZip(zip) {
+        if (!window.localStorage) {
+            return;
+        }
+
+        try {
+            if (/^\d{5}$/.test(zip)) {
+                localStorage.setItem(this.zipStorageKey, zip);
+            } else {
+                localStorage.removeItem(this.zipStorageKey);
+            }
+        } catch (error) {
+            // Silently fail if storage is not available
+        }
+    }
+
+    getStoredZip() {
+        if (!window.localStorage) {
+            return '';
+        }
+
+        try {
+            return localStorage.getItem(this.zipStorageKey) || '';
+        } catch (error) {
+            return '';
+        }
+    }
+
+    isBusinessDay(date) {
+        const day = date.getDay();
+
+        return day !== 0 && day !== 6;
+    }
+
+    getNextBusinessDay(date) {
+        const nextDay = new Date(date);
+
+        do {
+            nextDay.setDate(nextDay.getDate() + 1);
+        } while (!this.isBusinessDay(nextDay));
+
+        return nextDay;
+    }
+
+    addBusinessDays(date, days) {
+        let result = new Date(date);
+
+        for (let i = 0; i < days; i++) {
+            result = this.getNextBusinessDay(result);
+        }
+
+        return result;
+    }
+
+    estimateEta(zip) {
+        const zipPattern = /^\d{5}$/;
+
+        if (!zipPattern.test(zip)) {
+            return '';
+        }
+
+        const now = new Date();
+        const easternNow = new Date(now.toLocaleString('en-US', { timeZone: 'America/New_York' }));
+        const beforeCutoff = easternNow.getHours() < 14;
+
+        let shipDate = new Date(now);
+
+        if (!beforeCutoff || !this.isBusinessDay(shipDate)) {
+            shipDate = this.getNextBusinessDay(shipDate);
+        }
+
+        const transitDays = 3; // Midpoint between 2-5 business days
+        const arrivalDate = this.addBusinessDays(shipDate, transitDays);
+        const arrivalFormatted = arrivalDate.toLocaleDateString('en-US', {
+            weekday: 'long',
+            month: 'short',
+            day: 'numeric',
+        });
+
+        const shipsToday = beforeCutoff && this.isBusinessDay(new Date(now));
+        const shippingPhrase = shipsToday ? 'Ships today' : 'Ships next business day';
+
+        return `${shippingPhrase} · Arrives by ${arrivalFormatted}`;
+    }
 
     /* Halothemes*/
     soldProduct() {
         var numbersProductS = this.context.themeSettings.number_products;
-        var numbersProductList =  JSON.parse("[" + numbersProductS+ "]"); 
+        var numbersProductList =  JSON.parse("[" + numbersProductS+ "]");
         var numbersProductItem = (Math.floor(Math.random()*numbersProductList.length));
         var numbersProduct = numbersProductList[numbersProductItem];
 
