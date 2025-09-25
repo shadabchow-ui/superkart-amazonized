@@ -257,6 +257,82 @@
                     </h2>
                 {{/if}}
                 <h1 class="productView-title" {{#if schema}}itemprop="name"{{/if}}>{{product.title}}</h1>
+                {{#or product.brand product.custom_fields product.description}}
+                    <div class="productSummaryMeta">
+                        {{#or product.brand product.custom_fields}}
+                            <dl class="productSpecs">
+                                {{#inArray (pluck product.custom_fields 'name') 'brand'}}
+                                    {{#each product.custom_fields}}
+                                        {{#if name '==' 'brand'}}
+                                            {{#if value}}
+                                                <dt class="productSpecs-term">Brand</dt>
+                                                <dd class="productSpecs-definition">{{{sanitize value}}}</dd>
+                                            {{/if}}
+                                        {{/if}}
+                                    {{/each}}
+                                {{else}}
+                                    {{#if product.brand.name}}
+                                        <dt class="productSpecs-term">Brand</dt>
+                                        <dd class="productSpecs-definition">{{product.brand.name}}</dd>
+                                    {{/if}}
+                                {{/inArray}}
+                                {{#each product.custom_fields}}
+                                    {{#if name '==' 'net_volume_ml'}}
+                                        {{#if value}}
+                                            <dt class="productSpecs-term">Volume</dt>
+                                            <dd class="productSpecs-definition">{{round (divide value 29.5735) 1}} fl oz</dd>
+                                        {{/if}}
+                                    {{/if}}
+                                {{/each}}
+                                {{#each product.custom_fields}}
+                                    {{#if name '==' 'manufacturer'}}
+                                        {{#if value}}
+                                            <dt class="productSpecs-term">Manufacturer</dt>
+                                            <dd class="productSpecs-definition">{{{sanitize value}}}</dd>
+                                        {{/if}}
+                                    {{/if}}
+                                {{/each}}
+                                {{#each product.custom_fields}}
+                                    {{#if name '==' 'gtin'}}
+                                        {{#if value}}
+                                            <dt class="productSpecs-term">GTIN</dt>
+                                            <dd class="productSpecs-definition">{{{sanitize value}}}</dd>
+                                        {{/if}}
+                                    {{/if}}
+                                {{/each}}
+                                {{#each product.custom_fields}}
+                                    {{#if name '==' 'upc'}}
+                                        {{#if value}}
+                                            <dt class="productSpecs-term">UPC</dt>
+                                            <dd class="productSpecs-definition">{{{sanitize value}}}</dd>
+                                        {{/if}}
+                                    {{/if}}
+                                {{/each}}
+                            </dl>
+                        {{/or}}
+                        {{#if product.description}}
+                            {{#with (first (split product.description '<hr')) as |aboutSource|}}
+                                {{#with (split aboutSource '<li>') as |rawItems|}}
+                                    {{#if rawItems.length '>' 1}}
+                                        <ul class="aboutItem">
+                                            {{#each rawItems}}
+                                                {{#if @index '>' 0}}
+                                                    {{#if @index '<=' 4}}
+                                                        {{#with (first (split this '</li>')) as |bulletHtml|}}
+                                                            {{#if bulletHtml}}
+                                                                <li>{{{bulletHtml}}}</li>
+                                                            {{/if}}
+                                                        {{/with}}
+                                                    {{/if}}
+                                                {{/if}}
+                                            {{/each}}
+                                        </ul>
+                                    {{/if}}
+                                {{/with}}
+                            {{/with}}
+                        {{/if}}
+                    </div>
+                {{/or}}
                 <div class="productView-rating-wrap">
                     <div class="productView-rating"{{#if product.num_reviews '>' 0}}{{#if schema}} itemprop="aggregateRating" itemscope itemtype="http://schema.org/AggregateRating"{{/if}}{{/if}}>
                         {{#if settings.show_product_rating}}

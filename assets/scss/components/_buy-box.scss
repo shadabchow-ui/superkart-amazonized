@@ -1,3 +1,4 @@
+ codex/implement-3-column-pdp-layout
 .productView-layout {
     margin-top: spacing("double");
 }
@@ -175,4 +176,147 @@
 .buyBox-mobileBar-button {
     flex: 0 0 auto;
     min-width: 160px;
+=======
+.buyBox {
+    position: sticky;
+    top: 2rem;
+    align-self: flex-start;
+    z-index: 1;
+
+    &__inner {
+        background: #ffffff;
+        border: 1px solid rgba(17, 24, 39, 0.08);
+        border-radius: 0.75rem;
+        padding: 1.5rem;
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+        transition: box-shadow 0.3s ease, border-color 0.3s ease;
+    }
+
+    &__status {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    &__availability {
+        font-weight: 600;
+        color: #14532d;
+    }
+
+    &__eta {
+        font-size: 0.875rem;
+        color: #4b5563;
+        margin: 0;
+    }
+
+    &__pricing {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .unitPrice {
+        font-size: 0.875rem;
+        color: #1f2937;
+    }
+
+    &__form {
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+    }
+
+    #add-to-cart-wrapper {
+        display: grid;
+        gap: 1rem;
+    }
+
+    .form-increment {
+        width: 100%;
+    }
+
+    #form-action-addToCart {
+        width: 100%;
+    }
+
+    &__actions {
+        display: grid;
+        gap: 0.75rem;
+    }
+
+    &__buyNow {
+        width: 100%;
+    }
+
+    &__wishlist {
+        display: flex;
+        justify-content: center;
+        width: 100%;
+    }
+
+    &__wishlist form {
+        width: 100%;
+        max-width: 20rem;
+    }
+
+    &__wishlist .button {
+        width: 100%;
+    }
+
+    &__subscribe {
+        display: flex;
+        justify-content: center;
+        text-align: center;
+    }
+
+    &__subscribeToggle {
+        width: 100%;
+        max-width: 20rem;
+        border: 1px dashed rgba(17, 24, 39, 0.2);
+        border-radius: 999px;
+        padding: 0.75rem 1.5rem;
+        background: transparent;
+        color: #1f2937;
+        font-weight: 600;
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+        align-items: center;
+        cursor: not-allowed;
+    }
+
+    &__socialProof {
+        font-size: 0.875rem;
+        color: #b91c1c;
+        font-weight: 600;
+        margin: 0;
+        text-align: center;
+    }
+
+    &--stuck &__inner {
+        box-shadow: 0 1.5rem 2.5rem -1.5rem rgba(17, 24, 39, 0.45);
+        border-color: rgba(17, 24, 39, 0.1);
+    }
+
+    &__actions .button:focus,
+    &__actions .button:focus-visible,
+    #form-action-addToCart:focus,
+    #form-action-addToCart:focus-visible {
+        outline: 2px solid currentColor;
+        outline-offset: 3px;
+    }
+}
+
+@media (max-width: 767px) {
+    .buyBox {
+        position: static;
+        top: auto;
+    }
+
+    .buyBox__inner {
+        border-radius: 0.5rem;
+    }
+ main
 }

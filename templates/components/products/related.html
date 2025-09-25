@@ -1,8 +1,73 @@
-<h4>{{lang 'products.related_products' }}</h4>
-<ul class="product-list" data-list-name="Related Products">
-    {{#each this}}
-    <li class="product-card">
-            {{>components/products/card settings=../settings theme_settings=../theme_settings event="list" position=(add @index 1)}}
-    </li>
-    {{/each}}
-</ul>
+<section class="relatedProducts" data-related-products aria-label="Products related to this item">
+    <div class="relatedProducts-header">
+        <h2 class="relatedProducts-heading">Products related to this item</h2>
+        <div class="relatedProducts-nav">
+            <button class="relatedProducts-navButton relatedProducts-navButton--prev" type="button" data-related-prev aria-label="Previous related products">
+                <svg class="icon" aria-hidden="true"><use xlink:href="#icon-chevron-left" /></svg>
+            </button>
+            <button class="relatedProducts-navButton relatedProducts-navButton--next" type="button" data-related-next aria-label="Next related products">
+                <svg class="icon" aria-hidden="true"><use xlink:href="#icon-chevron-right" /></svg>
+            </button>
+        </div>
+    </div>
+    <div class="relatedProducts-carousel" data-related-products-carousel aria-roledescription="carousel" tabindex="0">
+        {{#each this}}
+        <div class="relatedProducts-slide">
+            <article class="relatedProducts-card" data-product-id="{{id}}">
+                <a class="relatedProducts-cardLink" href="{{url}}" aria-label="{{name}},{{> components/products/product-aria-label}}">
+                    <div class="relatedProducts-cardImage">
+                        {{> components/common/responsive-img
+                            image=image
+                            class="relatedProducts-cardImg"
+                            fallback_size=../theme_settings.productgallery_size
+                            lazyload='lazyload'
+                            default_image=../theme_settings.default_image_product
+                        }}
+                    </div>
+                    <div class="relatedProducts-cardContent">
+                        <h3 class="relatedProducts-cardTitle">{{name}}</h3>
+                        <div class="relatedProducts-cardPrice">
+                            {{#or ../customer (unless ../settings.hide_price_from_guests)}}
+                                {{#if price.with_tax}}
+                                    {{{price.with_tax.formatted}}}
+                                {{else}}
+                                    {{{price.without_tax.formatted}}}
+                                {{/if}}
+                            {{else}}
+                                {{> components/common/login-for-pricing}}
+                            {{/or}}
+                        </div>
+                        {{#if rating}}
+                            <div class="relatedProducts-cardRating" aria-label="{{rating}} out of 5 stars">
+                                {{> components/products/ratings rating=rating}}
+                                {{#if num_reviews}}
+                                    <span class="relatedProducts-cardReviewCount">({{num_reviews}})</span>
+                                {{/if}}
+                            </div>
+                        {{/if}}
+                        {{#each custom_fields}}
+                            {{#if name '==' 'net_volume_ml'}}
+                                <p class="relatedProducts-cardUnitPrice">
+                                    {{#or ../../customer (unless ../../settings.hide_price_from_guests)}}
+                                        {{#if ../../price.with_tax}}
+                                            {{money (divide ../../price.with_tax.value value)}}
+                                        {{else}}
+                                            {{money (divide ../../price.without_tax.value value)}}
+                                        {{/if}}
+                                        {{#each ../../custom_fields}}
+                                            {{#if name '==' 'unit_of_measure'}}
+                                                <span class="relatedProducts-cardUnitMeasure">/ {{value}}</span>
+                                            {{/if}}
+                                        {{/each}}
+                                    {{/or}}
+                                </p>
+                            {{/if}}
+                        {{/each}}
+                    </div>
+                </a>
+            </article>
+        </div>
+        {{/each}}
+    </div>
+    <div class="relatedProducts-dots" data-related-dots></div>
+</section>
