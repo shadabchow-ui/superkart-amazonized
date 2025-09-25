@@ -1,0 +1,78 @@
+.reviewHighlights {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: remCalc(8px);
+    margin-bottom: remCalc(24px);
+}
+
+.reviewHighlights-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: remCalc(8px);
+}
+
+.reviewHighlights-chip {
+    appearance: none;
+    border: 1px solid transparent;
+    border-radius: remCalc(999px);
+    background-color: $color-greyLightest;
+    color: $color-textHeading;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: remCalc(4px);
+    font-size: remCalc(14px);
+    line-height: 1.2;
+    padding: remCalc(6px) remCalc(14px);
+    transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+
+    &:hover,
+    &:focus {
+        background-color: $color-greyLight;
+    }
+
+    &:focus-visible {
+        outline: 2px solid $color-primary;
+        outline-offset: 2px;
+    }
+
+    &.is-active {
+        background-color: $color-primary;
+        color: $color-white;
+    }
+
+    &.is-active .reviewHighlights-count {
+        color: $color-white;
+    }
+
+    &--clear {
+        background-color: transparent;
+        border-color: $color-primary;
+        color: $color-primary;
+
+        &:hover,
+        &:focus {
+            background-color: rgba($color-primary, 0.1);
+        }
+    }
+
+    &:disabled,
+    &[aria-pressed='false'][disabled] {
+        cursor: not-allowed;
+        opacity: 0.6;
+    }
+}
+
+.reviewHighlights-count {
+    color: $color-textSecondary;
+    font-size: remCalc(12px);
+}
+
+.reviewHighlights-status {
+    width: 100%;
+}
+
+.productReviews-list .reviewHighlights-hidden {
+    display: none !important;
+}
