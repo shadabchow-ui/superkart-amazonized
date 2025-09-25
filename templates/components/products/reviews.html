@@ -25,6 +25,10 @@
             {{/if}}
         </h4>
         <div class="toggle-content" id="productReviews-content" aria-hidden="false">
+            <div class="reviewHighlights" data-review-highlights role="group" aria-label="Review highlights">
+                <div class="reviewHighlights-list" data-review-highlights-list></div>
+                <div class="reviewHighlights-status u-hiddenVisually" aria-live="polite" data-review-highlights-live></div>
+            </div>
             <ul class="productReviews-list" id="productReviews-list">
                 {{#each reviews.list}}
                 <li class="productReview">
