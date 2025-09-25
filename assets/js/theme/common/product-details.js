@@ -11,6 +11,14 @@ import bannerUtils from './utils/banner-utils';
 import haloCalculateFreeShipping from '../halothemes/haloCalculateFreeShipping';
 import GalleryPopup from '../halothemes/haloGalleryPopup';
 
+function computeUnitPrice({ priceCents, volumeMl, unit = 'fl oz' }) {
+    const mlPerOz = 29.5735;
+    const ounces = volumeMl / mlPerOz;
+    if (!priceCents || !ounces) return null;
+    const perUnit = (priceCents / 100) / ounces;
+    return `$${perUnit.toFixed(2)} per ${unit}`;
+}
+
 export default class ProductDetails extends ProductDetailsBase {
     constructor($scope, context, productAttributesData = {}) {
         super($scope, context);
@@ -92,6 +100,8 @@ export default class ProductDetails extends ProductDetailsBase {
         if (this.context.themeSettings.halo_viewing_product) {
             this.viewingProduct(this.context);
         }
+
+        this.updateUnitPrice();
     }
 
     setProductVariant() {
@@ -691,6 +701,94 @@ export default class ProductDetails extends ProductDetailsBase {
     updateProductAttributes(data) {
         super.updateProductAttributes(data);
         this.showProductImage(data.image);
+        this.updateUnitPrice(data);
+    }
+
+    updateUnitPrice(attributeData = {}) {
+        const $unitPrice = this.$scope.find('[data-unit-price]');
+
+        if (!$unitPrice.length) {
+            return;
+        }
+
+        const $volumeSource = this.$scope.find('[data-net-volume-ml]');
+
+        if (!$volumeSource.length) {
+            this.hideUnitPrice($unitPrice);
+            return;
+        }
+
+        const volumeMl = parseFloat($volumeSource.data('netVolumeMl'));
+
+        if (!volumeMl) {
+            this.hideUnitPrice($unitPrice);
+            return;
+        }
+
+        const unit = $volumeSource.data('unitOfMeasure') || $volumeSource.data('unit');
+
+        let priceCents = this.extractPriceCents(attributeData.price);
+
+        if (!priceCents) {
+            priceCents = this.getFallbackPriceCents();
+        }
+
+        const unitPriceText = computeUnitPrice({ priceCents, volumeMl, unit });
+
+        if (!unitPriceText) {
+            this.hideUnitPrice($unitPrice);
+            return;
+        }
+
+        $unitPrice.text(`(${unitPriceText})`);
+        $unitPrice.removeAttr('hidden');
+        $unitPrice.attr('aria-hidden', 'false');
+    }
+
+    hideUnitPrice($unitPrice) {
+        $unitPrice.text('');
+        $unitPrice.attr('hidden', true);
+        $unitPrice.attr('aria-hidden', 'true');
+    }
+
+    extractPriceCents(price = {}) {
+        if (!price) {
+            return null;
+        }
+
+        if (price.with_tax && price.with_tax.value) {
+            return Math.round(price.with_tax.value * 100);
+        }
+
+        if (price.without_tax && price.without_tax.value) {
+            return Math.round(price.without_tax.value * 100);
+        }
+
+        if (price.value) {
+            return Math.round(price.value * 100);
+        }
+
+        return null;
+    }
+
+    getFallbackPriceCents() {
+        const $priceWithTax = this.$scope.find('[data-product-price-with-tax]').first();
+        const $priceWithoutTax = this.$scope.find('[data-product-price-without-tax]').first();
+
+        const priceText = $priceWithTax.text() || $priceWithoutTax.text();
+
+        if (!priceText) {
+            return null;
+        }
+
+        const normalizedPrice = priceText.replace(/[^0-9.,]/g, '').replace(/,/g, '');
+        const priceValue = parseFloat(normalizedPrice);
+
+        if (Number.isNaN(priceValue)) {
+            return null;
+        }
+
+        return Math.round(priceValue * 100);
     }
 
     /* Halothemes*/
