@@ -92,6 +92,8 @@ export default class ProductDetails extends ProductDetailsBase {
         if (this.context.themeSettings.halo_viewing_product) {
             this.viewingProduct(this.context);
         }
+
+        this.initSubscribeSave();
     }
 
     setProductVariant() {
@@ -691,6 +693,357 @@ export default class ProductDetails extends ProductDetailsBase {
     updateProductAttributes(data) {
         super.updateProductAttributes(data);
         this.showProductImage(data.image);
+    }
+
+    initSubscribeSave() {
+        this.$subscribeToggle = $('[data-subscribe-toggle]', this.$scope);
+
+        if (!this.$subscribeToggle.length) {
+            return;
+        }
+
+        this.$subscribePlan = $('[data-subscribe-plan]', this.$scope);
+        this.$subscribePlanWrapper = this.$subscribePlan.closest('[data-subscribe-plan-wrapper]');
+        this.$subscribePriceRegion = $('[data-subscribe-price-region]', this.$scope);
+        this.$subscribeBasePrice = $('[data-subscribe-price-base]', this.$scope);
+        this.$subscribeDiscountPrice = $('[data-subscribe-price-subscribed]', this.$scope);
+        this.$subscribeOriginalPrice = $('[data-subscribe-original-price]', this.$scope);
+        this.$subscribeDiscountedPrice = $('[data-subscribe-discounted-price]', this.$scope);
+        this.$subscribeCtaButtons = this.getSubscribeCtaTargets();
+
+        if (!this.$subscribePlanWrapper.length) {
+            this.$subscribePlanWrapper = this.$subscribePlan.parent();
+        }
+
+        if (!this.$subscribePriceRegion.length) {
+            this.$subscribePriceRegion = $('.productView-price', this.$scope);
+        }
+
+        if (this.$subscribePriceRegion.length && !this.$subscribePriceRegion.attr('aria-live')) {
+            this.$subscribePriceRegion.attr('aria-live', 'polite');
+        }
+
+        if (this.$subscribePlanWrapper.length && !this.$subscribePlanWrapper.attr('hidden')) {
+            this.$subscribePlanWrapper.attr('hidden', true);
+        }
+
+        if (this.$subscribeDiscountPrice.length && !this.$subscribeDiscountPrice.attr('hidden')) {
+            this.$subscribeDiscountPrice.attr('hidden', true);
+        }
+
+        this.subscribeState = {
+            active: false,
+            basePriceMarkup: '',
+            basePriceValue: null,
+            discountedPriceValue: null,
+            currency: {
+                symbol: '',
+                position: 'prefix',
+            },
+        };
+
+        if (this.$subscribePlan.length) {
+            this.$subscribeToggle.attr('aria-controls', this.$subscribePlan.attr('id'));
+        }
+
+        this.$subscribeCtaButtons.each((_, element) => {
+            const $element = $(element);
+            const originalText = $element.is('input') ? $element.val() : $element.text();
+            $element.data('subscribeOriginalText', originalText);
+        });
+
+        this.$subscribeToggle.on('change', (event) => {
+            this.handleSubscribeToggleChange(event.target.checked);
+        });
+
+        if (this.$subscribePlan.length) {
+            this.$subscribePlan.on('change', () => {
+                this.triggerSubscriptionEvent('pdp:subscribe-plan-change', {
+                    active: this.subscribeState.active,
+                    plan: this.$subscribePlan.val(),
+                });
+            });
+        }
+
+        this.captureBasePriceState();
+    }
+
+    getSubscribeCtaTargets() {
+        const $form = $('form[data-cart-item-add]', this.$scope);
+        const $primaryButtons = $form.find('input[type="submit"], button[type="submit"]');
+        const $buyNowButtons = $('[data-buy-now-button]', this.$scope);
+
+        return $primaryButtons.add($buyNowButtons);
+    }
+
+    handleSubscribeToggleChange(isChecked) {
+        if (!this.$subscribePlanWrapper || !this.$subscribePlanWrapper.length || !this.$subscribePriceRegion.length) {
+            return;
+        }
+
+        const planValue = this.$subscribePlan.length ? this.$subscribePlan.val() : null;
+
+        if (isChecked) {
+            this.subscribeState.active = true;
+            this.captureBasePriceState();
+            this.applySubscribeDiscount();
+            this.togglePlanVisibility(true);
+            this.updateCtaText('Subscribe Now');
+            this.triggerSubscriptionEvent('pdp:subscribe-toggle', {
+                active: true,
+                plan: planValue,
+                basePrice: this.subscribeState.basePriceValue,
+                discountedPrice: this.subscribeState.discountedPriceValue,
+            });
+        } else {
+            this.subscribeState.active = false;
+            this.togglePlanVisibility(false);
+            this.restoreSubscribePricing();
+            this.updateCtaText();
+            this.triggerSubscriptionEvent('pdp:subscribe-toggle', {
+                active: false,
+                plan: planValue,
+                basePrice: this.subscribeState.basePriceValue,
+                discountedPrice: null,
+            });
+        }
+    }
+
+    togglePlanVisibility(shouldShow) {
+        if (!this.$subscribePlanWrapper || !this.$subscribePlanWrapper.length) {
+            return;
+        }
+
+        if (shouldShow) {
+            this.$subscribePlanWrapper.removeAttr('hidden');
+        } else {
+            this.$subscribePlanWrapper.attr('hidden', true);
+        }
+    }
+
+    updateCtaText(newText) {
+        if (!this.$subscribeCtaButtons || !this.$subscribeCtaButtons.length) {
+            return;
+        }
+
+        this.$subscribeCtaButtons.each((_, element) => {
+            const $element = $(element);
+            const originalText = $element.data('subscribeOriginalText');
+
+            if (typeof originalText === 'undefined') {
+                return;
+            }
+
+            if (newText) {
+                if ($element.is('input')) {
+                    $element.val(newText);
+                } else {
+                    $element.text(newText);
+                }
+            } else if ($element.is('input')) {
+                $element.val(originalText);
+            } else {
+                $element.text(originalText);
+            }
+        });
+    }
+
+    captureBasePriceState() {
+        if (!this.$subscribeBasePrice || !this.$subscribeBasePrice.length) {
+            return;
+        }
+
+        this.subscribeState.basePriceMarkup = this.$subscribeBasePrice.html();
+
+        const basePriceText = this.getPrimaryPriceText(this.$subscribeBasePrice);
+        const basePriceValue = this.parsePriceString(basePriceText);
+
+        if (basePriceValue !== null) {
+            this.subscribeState.basePriceValue = basePriceValue;
+            this.subscribeState.currency = this.extractCurrencyInfo(basePriceText);
+        }
+    }
+
+    restoreSubscribePricing() {
+        if (!this.$subscribeBasePrice || !this.$subscribeDiscountPrice || !this.$subscribeBasePrice.length || !this.$subscribeDiscountPrice.length) {
+            return;
+        }
+
+        if (this.subscribeState.basePriceMarkup) {
+            this.$subscribeBasePrice.html(this.subscribeState.basePriceMarkup);
+        }
+
+        if (this.$subscribeDiscountPrice.length) {
+            this.$subscribeDiscountPrice.attr('hidden', true);
+        }
+
+        if (this.$subscribeBasePrice.length) {
+            this.$subscribeBasePrice.removeAttr('hidden');
+        }
+        this.subscribeState.discountedPriceValue = null;
+    }
+
+    applySubscribeDiscount() {
+        if (!this.$subscribeBasePrice || !this.$subscribeDiscountPrice || !this.$subscribeBasePrice.length || !this.$subscribeDiscountPrice.length) {
+            return;
+        }
+
+        const basePriceValue = this.subscribeState.basePriceValue;
+
+        if (basePriceValue === null) {
+            return;
+        }
+
+        const discountedPriceValue = this.roundCurrency(basePriceValue * 0.95);
+        const formattedBasePrice = this.formatPrice(basePriceValue);
+        const formattedDiscountedPrice = this.formatPrice(discountedPriceValue);
+
+        if (this.$subscribeOriginalPrice.length) {
+            this.$subscribeOriginalPrice.html(`<s>${formattedBasePrice}</s>`);
+        }
+
+        if (this.$subscribeDiscountedPrice.length) {
+            this.$subscribeDiscountedPrice.text(formattedDiscountedPrice);
+        }
+
+        if (this.$subscribeBasePrice.length) {
+            this.$subscribeBasePrice.attr('hidden', true);
+        }
+
+        if (this.$subscribeDiscountPrice.length) {
+            this.$subscribeDiscountPrice.removeAttr('hidden');
+        }
+
+        this.subscribeState.discountedPriceValue = discountedPriceValue;
+
+        this.triggerSubscriptionEvent('pdp:subscribe-price-adjusted', {
+            active: true,
+            plan: this.$subscribePlan.length ? this.$subscribePlan.val() : null,
+            basePrice: basePriceValue,
+            discountedPrice: discountedPriceValue,
+        });
+    }
+
+    getPrimaryPriceText($container) {
+        if (!$container || !$container.length) {
+            return '';
+        }
+
+        const $priceWithTax = $container.find('[data-product-price-with-tax]').first();
+        if ($priceWithTax.length && $priceWithTax.text().trim()) {
+            return $priceWithTax.text().trim();
+        }
+
+        const $priceWithoutTax = $container.find('[data-product-price-without-tax]').first();
+        if ($priceWithoutTax.length && $priceWithoutTax.text().trim()) {
+            return $priceWithoutTax.text().trim();
+        }
+
+        return $container.text().trim();
+    }
+
+    parsePriceString(priceText) {
+        if (!priceText) {
+            return null;
+        }
+
+        const normalizedText = priceText.split('-')[0].trim();
+        const sanitized = normalizedText.replace(/[^0-9.,-]/g, '');
+
+        if (!sanitized) {
+            return null;
+        }
+
+        let candidate = sanitized;
+
+        if (sanitized.includes('.') && sanitized.includes(',')) {
+            if (sanitized.lastIndexOf('.') > sanitized.lastIndexOf(',')) {
+                candidate = sanitized.replace(/,/g, '');
+            } else {
+                candidate = sanitized.replace(/\./g, '').replace(/,/g, '.');
+            }
+        } else if (sanitized.includes(',')) {
+            const parts = sanitized.split(',');
+            const decimalLength = parts[parts.length - 1].length;
+            if (decimalLength === 3) {
+                candidate = sanitized.replace(/,/g, '');
+            } else {
+                candidate = sanitized.replace(/,/g, '.');
+            }
+        }
+
+        const value = parseFloat(candidate);
+
+        return Number.isNaN(value) ? null : value;
+    }
+
+    extractCurrencyInfo(priceText) {
+        if (!priceText) {
+            return {
+                symbol: '',
+                position: 'prefix',
+            };
+        }
+
+        const trimmed = priceText.trim();
+        const symbol = trimmed.replace(/[\d.,\s-]/g, '') || '';
+        const position = symbol && trimmed.lastIndexOf(symbol) > 0 ? 'suffix' : 'prefix';
+
+        return { symbol, position };
+    }
+
+    roundCurrency(value) {
+        return Math.round(value * 100) / 100;
+    }
+
+    formatPrice(value) {
+        if (value === null || typeof value === 'undefined') {
+            return '';
+        }
+
+        const currencyCode = $('[data-currency-code]').data('currency-code');
+        const locale = document.documentElement.lang || 'en-US';
+
+        if (currencyCode && window.Intl && typeof window.Intl.NumberFormat === 'function') {
+            try {
+                return new Intl.NumberFormat(locale, {
+                    style: 'currency',
+                    currency: currencyCode,
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2,
+                }).format(value);
+            } catch (error) {
+                // Fallback to manual formatting if Intl fails
+            }
+        }
+
+        const { symbol, position } = this.subscribeState.currency || {};
+        const formatted = value.toFixed(2);
+
+        if (symbol) {
+            return position === 'suffix' ? `${formatted}${symbol}` : `${symbol}${formatted}`;
+        }
+
+        return formatted;
+    }
+
+    triggerSubscriptionEvent(eventName, detail = {}) {
+        const event = $.Event(eventName);
+        event.detail = detail;
+        this.$scope.trigger(event);
+
+        if (typeof window.CustomEvent === 'function') {
+            window.dispatchEvent(new CustomEvent(eventName, { detail }));
+        }
+    }
+
+    updatePriceView(viewModel, price) {
+        super.updatePriceView(viewModel, price);
+        this.captureBasePriceState();
+
+        if (this.subscribeState && this.subscribeState.active) {
+            this.applySubscribeDiscount();
+        }
     }
 
     /* Halothemes*/
