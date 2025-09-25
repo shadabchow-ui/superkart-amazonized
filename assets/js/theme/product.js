@@ -11,6 +11,7 @@ import modalFactory, { modalTypes } from './global/modal';
 import haloBundleProducts from './halothemes/haloBundleProducts';
 import haloStickyAddToCart from './halothemes/haloStickyAddToCart';
 import haloPrevNextProduct from './halothemes/haloPrevNextProduct';
+import initRelatedProductsCarousel from './common/carousel/related';
 
 const { WRITE_REVIEW } = modalTypes;
 
@@ -49,6 +50,7 @@ export default class Product extends PageManager {
             haloBundleProducts(this.context);   
         }
         haloPrevNextProduct(this.context);
+        initRelatedProductsCarousel();
 
         const $reviewForm = classifyForm('.writeReview-form');
 

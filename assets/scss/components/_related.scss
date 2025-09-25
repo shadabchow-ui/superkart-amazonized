@@ -1,0 +1,195 @@
+.relatedProducts {
+    margin-top: spacing('double');
+
+    &-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: spacing('single');
+        margin-bottom: spacing('oneandhalf');
+    }
+
+    &-heading {
+        margin: 0;
+        font-size: fontSize('large');
+        font-weight: fontWeight('semiBold');
+        color: color('heading');
+    }
+
+    &-nav {
+        display: flex;
+        gap: spacing('half');
+    }
+
+    &-navButton {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: remCalc(40);
+        height: remCalc(40);
+        border-radius: 50%;
+        border: 1px solid color('greys', '300');
+        background-color: color('white');
+        color: color('greys', '700');
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        transition: background-color 150ms ease, color 150ms ease, box-shadow 150ms ease;
+
+        .icon {
+            width: remCalc(16);
+            height: remCalc(16);
+        }
+
+        &:hover,
+        &:focus {
+            background-color: color('primary');
+            color: color('white');
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.16);
+            outline: none;
+        }
+
+        &[disabled],
+        &[aria-disabled="true"] {
+            cursor: not-allowed;
+            opacity: 0.4;
+            background-color: color('white');
+            color: color('greys', '500');
+            box-shadow: none;
+        }
+    }
+
+    &-carousel {
+        position: relative;
+    }
+
+    &-slide {
+        padding: 0 spacing('half');
+    }
+
+    &-card {
+        height: 100%;
+        background-color: color('white');
+        border-radius: radius('small');
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.04);
+        transition: transform 150ms ease, box-shadow 150ms ease;
+
+        &:hover,
+        &:focus-within {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 32px rgba(0, 0, 0, 0.08);
+        }
+    }
+
+    &-cardLink {
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+        text-decoration: none;
+        color: inherit;
+        padding: spacing('single');
+        gap: spacing('single');
+    }
+
+    &-cardImage {
+        width: 100%;
+        padding-top: 100%;
+        position: relative;
+        overflow: hidden;
+        border-radius: radius('small');
+        background-color: color('greys', '050');
+
+        img {
+            position: absolute;
+            inset: 0;
+            margin: auto;
+            max-height: 100%;
+            width: 100%;
+            object-fit: contain;
+        }
+    }
+
+    &-cardContent {
+        display: flex;
+        flex-direction: column;
+        gap: spacing('half');
+        flex-grow: 1;
+    }
+
+    &-cardTitle {
+        font-size: fontSize('base');
+        font-weight: fontWeight('semiBold');
+        margin: 0;
+        color: color('text');
+        line-height: 1.4;
+    }
+
+    &-cardPrice {
+        font-size: fontSize('large');
+        font-weight: fontWeight('semiBold');
+        color: color('primary');
+    }
+
+    &-cardRating {
+        display: flex;
+        align-items: center;
+        gap: spacing('quarter');
+        font-size: fontSize('small');
+        color: color('text');
+    }
+
+    &-cardReviewCount {
+        font-size: fontSize('small');
+        color: color('greys', '600');
+    }
+
+    &-cardUnitPrice {
+        margin: 0;
+        font-size: fontSize('small');
+        color: color('greys', '600');
+    }
+
+    &-dots {
+        margin-top: spacing('single');
+
+        .slick-dots {
+            display: flex;
+            justify-content: center;
+            gap: spacing('half');
+
+            li {
+                margin: 0;
+            }
+
+            button {
+                width: remCalc(10);
+                height: remCalc(10);
+                padding: 0;
+                border-radius: 50%;
+                background-color: color('greys', '300');
+                border: none;
+                text-indent: -9999px;
+                transition: background-color 150ms ease, transform 150ms ease;
+
+                &:hover,
+                &:focus {
+                    background-color: color('primary');
+                    transform: scale(1.1);
+                    outline: none;
+                }
+            }
+
+            .slick-active button {
+                background-color: color('primary');
+            }
+        }
+    }
+
+    .slick-list {
+        margin: 0 -#{spacing('half')};
+    }
+
+    @include breakpoint('small') {
+        &-cardLink {
+            padding: spacing('oneandhalf');
+        }
+    }
+}
