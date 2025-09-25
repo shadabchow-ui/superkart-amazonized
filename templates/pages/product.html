@@ -33,6 +33,8 @@ product:
     <div itemscope itemtype="http://schema.org/Product">
         {{> components/products/product-view schema=true  }}
 
+        {{> components/products/fbt product=product}}
+
         {{{region name="product_below_content"}}}
 
         {{#if product.videos.list.length}}
