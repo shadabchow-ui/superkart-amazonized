@@ -1,3 +1,31 @@
+ codex/implement-unit-price-calculation-feature
+<div class="buyBox"
+    data-buy-box
+    {{#each product.custom_fields}}
+        {{#if name '==' 'net_volume_ml'}}
+            data-net-volume-ml="{{value}}"
+        {{/if}}
+        {{#if name '==' 'unit_of_measure'}}
+            data-unit-of-measure="{{value}}"
+        {{/if}}
+    {{/each}}
+>
+    <div class="buyBox-price">
+        {{#if product.call_for_price}}
+            <p class="productView-price">
+                <span>{{product.call_for_price}}</span>
+            </p>
+        {{else}}
+            {{#or customer (unless settings.hide_price_from_guests)}}
+                {{> components/products/price price=product.price schema_org=schema}}
+                <span class="unitPrice" data-unit-price aria-live="polite" aria-hidden="true" hidden></span>
+            {{else}}
+                {{> components/common/login-for-pricing}}
+            {{/or}}
+        {{/if}}
+    </div>
+</div>
+
  codex/implement-sticky-buy-box-and-buy-now
 <div class="buyBox" data-buy-box>
     <div class="buyBox__inner">
@@ -118,5 +146,6 @@
 
     {{> components/products/add-to-cart}}
 </div>
+ main
  main
  main
