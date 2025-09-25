@@ -1,0 +1,24 @@
+{{#if custom_fields}}
+    {{#each custom_fields}}
+        {{#if name '==' 'a_plus_html'}}
+            {{#if value}}
+                <section class="aPlusContent">
+                    <div class="container">
+                        <div class="aPlusContent-body">
+                            {{{ sanitize value allowed_tags="p,h2,h3,h4,ul,ol,li,img,div,span" allowed_attributes="class,alt,src,title" }}}
+                        </div>
+                        {{#each ../custom_fields}}
+                            {{#if name '==' 'a_plus_footnote'}}
+                                {{#if value}}
+                                    <div class="aPlusContent-footnote">
+                                        {{{ sanitize value allowed_tags="p,ul,ol,li,div,span" allowed_attributes="class" }}}
+                                    </div>
+                                {{/if}}
+                            {{/if}}
+                        {{/each}}
+                    </div>
+                </section>
+            {{/if}}
+        {{/if}}
+    {{/each}}
+{{/if}}
