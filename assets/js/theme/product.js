@@ -75,7 +75,11 @@ export default class Product extends PageManager {
         });
 
         this.productReviewHandler();
+ codex/implement-sticky-buy-box-and-buy-now
+        this.initBuyBox();
+
         this.initializeFrequentlyBoughtTogether();
+ main
     }
 
     ariaDescribeReviewInputs($form) {
@@ -225,6 +229,81 @@ export default class Product extends PageManager {
             }
         });
     }
+
+ codex/implement-sticky-buy-box-and-buy-now
+    initBuyBox() {
+        const buyBox = document.querySelector('[data-buy-box]');
+
+        if (!buyBox) {
+            return;
+        }
+
+        const stickyClass = 'buyBox--stuck';
+        const stickyThreshold = 300;
+        const handleStickyState = () => {
+            if (window.scrollY > stickyThreshold) {
+                buyBox.classList.add(stickyClass);
+            } else {
+                buyBox.classList.remove(stickyClass);
+            }
+        };
+
+        window.addEventListener('scroll', handleStickyState);
+        handleStickyState();
+
+        const buyNowButton = buyBox.querySelector('[data-buy-now]');
+        const addToCartForm = buyBox.querySelector('form[data-cart-item-add]');
+        const checkoutForm = buyBox.querySelector('[data-buy-now-form]');
+
+        if (!buyNowButton || !addToCartForm || !checkoutForm) {
+            return;
+        }
+
+        buyNowButton.addEventListener('click', event => {
+            event.preventDefault();
+
+            if (typeof addToCartForm.reportValidity === 'function' && !addToCartForm.reportValidity()) {
+                return;
+            }
+
+            const addToCartButton = addToCartForm.querySelector('#form-action-addToCart');
+
+            if (addToCartButton && addToCartButton.disabled) {
+                return;
+            }
+
+            checkoutForm.querySelectorAll('[data-dynamic-input]').forEach(input => input.remove());
+
+            const formData = new FormData(addToCartForm);
+
+            formData.forEach((value, key) => {
+                if (key === 'action' || key === 'product_id') {
+                    return;
+                }
+
+                if (value === '' || value === null) {
+                    return;
+                }
+
+                if (typeof File !== 'undefined' && value instanceof File) {
+                    if (!value.name) {
+                        return;
+                    }
+
+                    // Files cannot be sent through hidden inputs; skip for now.
+                    return;
+                }
+
+                const hiddenInput = document.createElement('input');
+                hiddenInput.type = 'hidden';
+                hiddenInput.name = key;
+                hiddenInput.value = value;
+                hiddenInput.setAttribute('data-dynamic-input', '');
+                checkoutForm.appendChild(hiddenInput);
+            });
+
+            checkoutForm.submit();
+        });
 
     initializeFrequentlyBoughtTogether() {
         const container = document.querySelector('[data-fbt-skus]');
@@ -716,5 +795,6 @@ export default class Product extends PageManager {
 
             return (value) => `${symbol}${Number(value || 0).toFixed(decimals)}`;
         }
+ main
     }
 }
